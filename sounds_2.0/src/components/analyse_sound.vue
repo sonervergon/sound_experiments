@@ -8,24 +8,52 @@
             <div class="column"></div>
             <div class="column">
               <div class="section">
-                <b-field label="File Name">
+                <b-field class="has-text-danger" label="File Name">
                   <b-input v-model="fileName" rounded></b-input>
                 </b-field>
-                <a
-                  @click="init"
-                  style="margin-left:10px;"
-                  class="button is-primary"
-                  >Init</a
-                >
-                <a @click="startRecording" class="button is-primary"
-                  >Record Sound</a
-                >
-                <a
-                  @click="analyseSound"
-                  style="margin-left:10px;"
-                  class="button is-primary"
-                  >Analyse Sound</a
-                >
+                <div style="margin-top: 20px" class="">
+                  <a
+                    v-if="!initialized"
+                    @click="init"
+                    style="margin-left:10px;"
+                    class="button is-success"
+                    >Initialize Recorder</a
+                  >
+                </div>
+                <div style="margin-top: 20px" class="">
+                  <a
+                    v-if="!isRecording"
+                    @click="startRecording"
+                    class="button is-primary"
+                    >Record Sound</a
+                  >
+                </div>
+                <div v-if="isRecording" style="margin-top: 20px" class="">
+                  <a
+                    @click="stopRecording"
+                    style="margin-left:10px;"
+                    class="button is-danger"
+                    >Upload Sound</a
+                  >
+                </div>
+                <div style="margin-top: 40px" class="">
+                  <b-message
+                    :closable="false"
+                    type="is-success"
+                    title="Recorder properties"
+                    :active="true"
+                  >
+                    <div v-html="recorderProperties"></div>
+                  </b-message>
+                  <b-message
+                    :closable="false"
+                    type="is-danger"
+                    title="Error messages"
+                    :active.sync="isActive"
+                  >
+                    <div v-html="errorMessage"></div>
+                  </b-message>
+                </div>
               </div>
             </div>
             <div class="column"></div>
@@ -34,9 +62,6 @@
               :active.sync="isLoading"
               :can-cancel="false"
             ></b-loading>
-            <b-message title="Error messages" :active.sync="isActive">
-              <div v-html="errorMessage"></div>
-            </b-message>
           </div>
         </div>
       </div>
@@ -56,14 +81,21 @@ export default {
       errorMessage: "",
       isActive: true,
       fileName: "sound_",
-      isLoading: false
+      isLoading: false,
+      isRecording: false,
+      initialized: false,
+      recorderProperties: ""
     };
   },
   methods: {
-    analyseSound() {
+    stopRecording() {
       this.recorder.stop();
     },
     startRecording() {
+      this.isRecording = true;
+      this.$toast.open({
+        message: "Recording!"
+      });
       this.recorder.start();
     },
     downloadFile() {
@@ -73,6 +105,14 @@ export default {
       // Init audio context
       var AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioCtx = new AudioContext();
+      this.recorderProperties = `
+        <p>Latency: ${this.audioCtx.baseLatency}</p>
+        <p>Sample Rate: ${this.audioCtx.sampleRate}</p>
+        <p>Number of output channels: ${
+          this.audioCtx.destination.channelCount
+        }</p>
+        <p>Platform: ${window.navigator.platform}</p>
+      `;
       const reader = new FileReader();
       reader.onloadend = event => {
         // The contents of the BLOB are in reader.result:
@@ -84,7 +124,7 @@ export default {
           const fileData = JSON.stringify(rawO);
           var file = new Blob([fileData], { type: "text/plain" });
           this.$toast.open({
-            message: "Uploading data!",
+            message: "Recording stoped! Uploading data!",
             type: "is-warning"
           });
           this.file = file;
@@ -116,6 +156,7 @@ export default {
                 })
                 .then(() => {
                   this.isLoading = false;
+                  this.isRecording = false;
                   this.$toast.open({
                     message: "Done!",
                     type: "is-success"
@@ -124,7 +165,6 @@ export default {
             });
         });
       };
-
       const navigator = navigator || window.navigator;
       // Init recorder
       console.log(navigator.mediaDevices.getSupportedConstraints());
@@ -138,6 +178,10 @@ export default {
         .then(stream => {
           this.stream = stream;
           this.recorder = new MediaRecorder(stream);
+          this.initialized = true;
+          this.$toast.open({
+            message: "Recorder initialized!"
+          });
           this.recorder.ondataavailable = function(e) {
             const arr = reader.readAsArrayBuffer(e.data);
           };
@@ -161,3 +205,8 @@ export default {
   }
 };
 </script>
+<style>
+.label {
+  color: #fff !important;
+}
+</style>
