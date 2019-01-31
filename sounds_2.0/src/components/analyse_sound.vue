@@ -74,6 +74,8 @@ import * as firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/storage";
 import saveAs from "file-saver";
+import MediaRecorder from "audio-recorder-polyfill";
+
 export default {
   name: "app",
   data: () => {
@@ -165,8 +167,21 @@ export default {
             });
         });
       };
-      const navigator = navigator || window.navigator;
+      navigator.getUserMedia =
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
       // Init recorder
+      this.recorderProperties = `
+        <p>Latency: ${this.audioCtx.baseLatency}</p>
+        <p>Sample Rate: ${this.audioCtx.sampleRate}</p>
+        <p>Number of output channels: ${
+          this.audioCtx.destination.channelCount
+        }</p>
+        <p>Platform: ${window.navigator.platform}</p>
+        <p>Navigator: ${navigator.mediaDevices}</p>
+      `;
       console.log(navigator.mediaDevices.getSupportedConstraints());
       navigator.mediaDevices
         .getUserMedia({
@@ -182,9 +197,9 @@ export default {
           this.$toast.open({
             message: "Recorder initialized!"
           });
-          this.recorder.ondataavailable = function(e) {
+          this.recorder.addEventListener("dataavailable", e => {
             const arr = reader.readAsArrayBuffer(e.data);
-          };
+          });
         })
         .catch(e => {});
     }

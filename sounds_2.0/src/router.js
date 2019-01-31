@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Home from "./views/Home.vue";
 import Create from "@/components/create_sound";
 import Analyse from "@/components/analyse_sound";
+import AnalyseIOS from "@/components/ios_analyse";
 
 Vue.use(Router);
 
@@ -23,6 +24,11 @@ export default new Router({
       path: "/analyse",
       name: "analyse",
       component: Analyse
+    },
+    {
+      path: "/analyse.ios",
+      name: "analyse.ios",
+      component: AnalyseIOS
     },
     {
       path: "/about",
