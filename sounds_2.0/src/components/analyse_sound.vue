@@ -180,9 +180,7 @@ export default {
           this.audioCtx.destination.channelCount
         }</p>
         <p>Platform: ${window.navigator.platform}</p>
-        <p>Navigator: ${navigator.mediaDevices}</p>
       `;
-      console.log(navigator.mediaDevices.getSupportedConstraints());
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
