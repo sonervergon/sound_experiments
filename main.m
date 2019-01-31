@@ -5,16 +5,16 @@ clear; clc; warning off;
 % Lp = 10*log(raw_data.^2/p_ref^2);
 
 % Random microphone sounds from different devices.
-mac = DataImporter('sounds_sound_mac.txt');
-op = DataImporter('sounds_sound_oneplus.txt'); % One plus
+% mac = DataImporter('sounds_sound_mac.txt');
+% op = DataImporter('sounds_sound_oneplus.txt'); % One plus
 
 % One plus high freq, seems like there are some kind of filter 
 % opHF = DataImporter('sounds_sound_oneplusHF.txt'); 
 % op15000 = DataImporter('sounds_sound_op_1500.txt'); 
 % op6500 = DataImporter('sounds_sound_op_6500.txt'); 
 % op10000 = DataImporter('sounds_sound_op_10000.txt');
-opNoise = DataImporter('sounds_sound_op_noise.txt');
-% opR = DataImporter('sounds_sound_karsten.txt'); 
+% opNoise = DataImporter('sounds_sound_op_noise.txt');
+opR = DataImporter('sounds_sound_matte2.txt'); 
 
 % smsng = DataImporter('sounds_sound_erik.txt'); % Samsung
 
@@ -29,7 +29,7 @@ sound(wgn(m,n,1))
 
 %% Sound with frequencies in 500Hz and 20kHz
 close all;
-sound = opNoise;
+sound = opR;
 
 subplot(2,1,1);
 plot(sound)
